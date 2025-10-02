@@ -1,0 +1,96 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist",
+    "withGlobalTauri": false
+  },
+  "package": {
+    "productName": "KoliseuOT Launcher",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "scope": [
+          "$APPDATA/*",
+          "$RESOURCE/*",
+          "$LOCALDATA/*"
+        ]
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "https://**"
+        ]
+      },
+      "process": {
+        "all": false,
+        "relaunch": true,
+        "exit": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": [
+        "msi"
+      ],
+      "identifier": "com.koliseuot.launcher",
+      "icon": [
+        "icons/icon.ico"
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "© 2025 KoliseuOT",
+      "category": "Game",
+      "shortDescription": "KoliseuOT Game Launcher",
+      "longDescription": "Official launcher for KoliseuOT - Auto-updates client and launcher",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": "",
+        "wix": {
+          "language": "en-US"
+        },
+        "nsis": {
+          "installMode": "currentUser"
+        }
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://game.koliseuot.com.br/launcher/updates/{{target}}/{{current_version}}"
+      ],
+      "dialog": false,
+      "pubkey": "YOUR_PUBLIC_KEY_HERE"
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": false,
+        "title": "KoliseuOT Launcher",
+        "width": 800,
+        "height": 600,
+        "center": true,
+        "decorations": true,
+        "transparent": false,
+        "alwaysOnTop": false
+      }
+    ]
+  }
+}
