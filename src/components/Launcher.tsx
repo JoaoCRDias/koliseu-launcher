@@ -3,11 +3,18 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { open } from "@tauri-apps/api/shell";
 import backgroundImage from "../assets/background.png";
 
+interface DownloadProgress {
+  stage: string;
+  message: string;
+  percent: number;
+}
+
 interface LauncherProps {
   isCheckingUpdates: boolean;
   isUpdatingClient: boolean;
   clientUpToDate: boolean;
-  onCheckUpdates: () => void;
+  downloadProgress: DownloadProgress;
+  errorMessage: string;
 }
 
 // Social media links
@@ -18,7 +25,8 @@ export default function Launcher({
   isCheckingUpdates,
   isUpdatingClient,
   clientUpToDate,
-  onCheckUpdates
+  downloadProgress,
+  errorMessage,
 }: LauncherProps) {
   const [isLaunching, setIsLaunching] = useState(false);
 
@@ -75,7 +83,47 @@ export default function Launcher({
 
         {/* Main Card */}
         <div className="bg-secondary/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 w-full max-w-md border border-accent/30">
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-900/30 rounded-lg border border-red-500/50">
+              <div className="flex items-start space-x-3">
+                <svg className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-200">Erro na atualização</p>
+                  <p className="text-xs text-red-300 mt-1 whitespace-pre-line">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
+          {/* Progress Info */}
+          {(isCheckingUpdates || isUpdatingClient) && (
+            <div className="mb-6 p-4 bg-accent/30 rounded-lg border border-accent/50">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-highlight"></div>
+                    <p className="text-sm font-medium text-gray-200">
+                      {isCheckingUpdates ? "Verificando versão do cliente..." : downloadProgress.message || "Atualizando cliente..."}
+                    </p>
+                  </div>
+                  {isUpdatingClient && downloadProgress.percent > 0 && (
+                    <span className="text-sm font-bold text-highlight">{downloadProgress.percent}%</span>
+                  )}
+                </div>
+                {isUpdatingClient && downloadProgress.percent > 0 && (
+                  <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-highlight to-pink-600 h-full transition-all duration-300"
+                      style={{ width: `${downloadProgress.percent}%` }}
+                    ></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Launch Button */}
           <button
@@ -91,28 +139,9 @@ export default function Launcher({
                 </svg>
                 Launching...
               </span>
-            ) : isCheckingUpdates ? (
-              "Checking for updates..."
-            ) : isUpdatingClient ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#5C4B3D]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Updating client...
-              </span>
             ) : (
               "🎮 PLAY NOW"
             )}
-          </button>
-
-          {/* Check Updates Button */}
-          <button
-            onClick={onCheckUpdates}
-            disabled={isCheckingUpdates}
-            className="w-full mt-4 py-2 bg-accent/50 text-gray-300 font-medium rounded-lg hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isCheckingUpdates ? "Checking..." : "Check for Updates"}
           </button>
         </div>
 

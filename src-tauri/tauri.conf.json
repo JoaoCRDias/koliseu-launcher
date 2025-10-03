@@ -74,7 +74,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://game.koliseuot.com.br/launcher/updates/{{target}}/{{current_version}}"
+        "https://game.koliseuot.com.br/launcher/updates/{{current_version}}"
       ],
       "dialog": false,
       "pubkey": "YOUR_PUBLIC_KEY_HERE"

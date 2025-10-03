@@ -7,8 +7,6 @@ interface UpdateModalProps {
 
 export default function UpdateModal({
   type,
-  currentVersion,
-  latestVersion,
   onUpdate,
 }: UpdateModalProps) {
   const title = type === "launcher" ? "Launcher Update Available" : "Client Update Available";
@@ -44,17 +42,6 @@ export default function UpdateModal({
         <div className="p-6">
           <p className="text-gray-300 mb-6">{description}</p>
 
-          <div className="bg-primary/50 rounded-lg p-4 mb-6 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Current Version:</span>
-              <span className="text-white font-semibold">{currentVersion}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Latest Version:</span>
-              <span className="text-highlight font-semibold">{latestVersion}</span>
-            </div>
-          </div>
-
           {/* Action Buttons */}
           <button
             onClick={onUpdate}
@@ -63,14 +50,7 @@ export default function UpdateModal({
             Update Now
           </button>
 
-          {type === "client" && (
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full mt-3 py-3 bg-accent/50 text-gray-300 font-medium rounded-lg hover:bg-accent transition-all"
-            >
-              Remind Me Later
-            </button>
-          )}
+
         </div>
       </div>
     </div>

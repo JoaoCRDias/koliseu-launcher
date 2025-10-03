@@ -53,20 +53,22 @@ Este documento contém todas as especificações técnicas necessárias para imp
 ### 1.5 Formato do Arquivo ZIP do Cliente
 
 O arquivo ZIP deve conter:
-- `Tibia.exe` - Executável principal do cliente
+- `bin/client.exe` - Executável principal do cliente (obrigatório)
 - Todos os arquivos necessários para o cliente funcionar
 - **Não incluir** arquivo `version.txt` (o launcher cria automaticamente)
 
 **Estrutura do ZIP**:
 ```
 client-1.2.3.zip
-├── Tibia.exe
+├── bin/
+│   └── client.exe (executável principal - OBRIGATÓRIO)
 ├── data/
 ├── assets/
 ├── storeimages/
-├── bin/
 └── ... (outros arquivos necessários)
 ```
+
+⚠️ **IMPORTANTE**: O launcher procura o executável em `bin/client.exe`. Se não encontrar, não conseguirá iniciar o jogo.
 
 ### 1.6 Substituição Seletiva de Pastas
 
