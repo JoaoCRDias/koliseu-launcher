@@ -1,11 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-use std::io::{self, Write};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 use tauri::Manager;
+use sysinfo::{System, Pid};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct UpdateInfo {
@@ -303,6 +303,35 @@ async fn download_client_update(
     Ok(())
 }
 
+// Kill process by name
+#[tauri::command]
+async fn kill_process_by_name(process_name: String) -> Result<u32, String> {
+    let mut system = System::new_all();
+    system.refresh_processes();
+
+    let mut killed_count = 0;
+
+    for (pid, process) in system.processes() {
+        let proc_name = process.name();
+        if proc_name.to_lowercase() == process_name.to_lowercase()
+            || proc_name.to_lowercase() == format!("{}.exe", process_name.to_lowercase()) {
+            println!("Killing process: {} (PID: {:?})", proc_name, pid);
+            if process.kill() {
+                killed_count += 1;
+                println!("Process {:?} killed successfully", pid);
+            } else {
+                println!("Failed to kill process {:?}", pid);
+            }
+        }
+    }
+
+    if killed_count > 0 {
+        Ok(killed_count)
+    } else {
+        Err(format!("No process found with name: {}", process_name))
+    }
+}
+
 // Launch the client
 #[tauri::command]
 async fn launch_client(
@@ -337,7 +366,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             check_client_update,
             download_client_update,
-            launch_client
+            launch_client,
+            kill_process_by_name
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
