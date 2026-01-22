@@ -2,13 +2,14 @@ import axios from 'axios';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import * as os from 'os';
 import extract from 'extract-zip';
 import { BrowserWindow } from 'electron';
 import { getClientDir } from './updater';
 import { DownloadProgress, FileChecksums } from '../types';
 
-// Folders that should be completely replaced during update
-const REPLACE_FOLDERS = ['assets', 'storeimages', 'bin'];
+// Folders that should never be replaced when updating (user data, configs, etc.)
+const KEPT_FOLDERS = ['characterdata', 'conf', 'minimap', 'screenshots'];
 
 /**
  * Calculate SHA256 checksum of a file
@@ -49,6 +50,41 @@ async function collectFilesForChecksum(
       const checksum = await calculateFileChecksum(fullPath);
       files[relativePath.replace(/\\/g, '/')] = checksum;
     }
+  }
+}
+
+/**
+ * Remove all entries in the client directory except the kept folders
+ */
+async function removeNonKeptEntries(clientDir: string): Promise<void> {
+  if (!(await fs.pathExists(clientDir))) {
+    return;
+  }
+
+  const entries = await fs.readdir(clientDir);
+  for (const entry of entries) {
+    if (KEPT_FOLDERS.includes(entry)) {
+      continue;
+    }
+
+    await fs.remove(path.join(clientDir, entry));
+  }
+}
+
+/**
+ * Copy extracted files into the client directory while preserving kept folders
+ */
+async function copyExtractedFiles(sourceDir: string, targetDir: string): Promise<void> {
+  const entries = await fs.readdir(sourceDir);
+
+  for (const entry of entries) {
+    if (KEPT_FOLDERS.includes(entry)) {
+      continue;
+    }
+
+    const sourcePath = path.join(sourceDir, entry);
+    const destinationPath = path.join(targetDir, entry);
+    await fs.copy(sourcePath, destinationPath, { overwrite: true });
   }
 }
 
@@ -148,28 +184,48 @@ export async function downloadClientUpdate(
 
     console.log(`ZIP file saved successfully: ${stats.size} bytes`);
 
-    // Emit progress: Extracting
-    sendProgress(mainWindow, {
-      stage: 'extracting',
-      message: 'Extraindo...',
-      percent: 0,
-    });
+    const tempExtractDir = await fs.mkdtemp(path.join(os.tmpdir(), 'koliseu-client-'));
 
-    // Extract zip file with selective replacement
-    await extract(zipPath, {
-      dir: clientDir,
-      onEntry: (entry, zipfile) => {
-        const totalEntries = zipfile.entryCount;
-        const currentIndex = zipfile.entriesRead;
-        const percent = Math.round((currentIndex / totalEntries) * 100);
+    try {
+      // Emit progress: Extracting
+      sendProgress(mainWindow, {
+        stage: 'extracting',
+        message: 'Extraindo...',
+        percent: 0,
+      });
 
-        sendProgress(mainWindow, {
-          stage: 'extracting',
-          message: `Extraindo... ${currentIndex} / ${totalEntries}`,
-          percent,
-        });
-      },
-    });
+      // Extract zip file with selective replacement
+      await extract(zipPath, {
+        dir: tempExtractDir,
+        onEntry: (entry, zipfile) => {
+          const totalEntries = zipfile.entryCount;
+          const currentIndex = zipfile.entriesRead;
+          const percent = Math.round((currentIndex / totalEntries) * 100);
+
+          sendProgress(mainWindow, {
+            stage: 'extracting',
+            message: `Extraindo... ${currentIndex} / ${totalEntries}`,
+            percent,
+          });
+        },
+      });
+
+      sendProgress(mainWindow, {
+        stage: 'extracting',
+        message: 'Removendo arquivos antigos...',
+        percent: 90,
+      });
+      await removeNonKeptEntries(clientDir);
+
+      sendProgress(mainWindow, {
+        stage: 'extracting',
+        message: 'Aplicando nova versão...',
+        percent: 95,
+      });
+      await copyExtractedFiles(tempExtractDir, clientDir);
+    } finally {
+      await fs.remove(tempExtractDir);
+    }
 
     // Clean up zip file
     if (await fs.pathExists(zipPath)) {

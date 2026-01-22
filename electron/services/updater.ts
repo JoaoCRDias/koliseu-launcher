@@ -20,7 +20,7 @@ export async function getCurrentClientVersion(): Promise<string> {
   try {
     const clientDir = getClientDir();
     const versionFile = path.join(clientDir, 'version.txt');
-
+    console.log('[DEBUG] Reading version file at:', versionFile);
     if (await fs.pathExists(versionFile)) {
       const version = await fs.readFile(versionFile, 'utf-8');
       return version.trim();

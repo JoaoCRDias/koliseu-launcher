@@ -59,7 +59,8 @@ function App() {
       // Get launcher version
       electronAPI.getLauncherVersion?.().then((version: string) => {
         setLauncherVersion(version);
-      }).catch(() => {
+      }).catch((error: any) => {
+        console.error("Failed to get launcher version:", error);
         // Ignore errors in dev mode
       });
     }
@@ -87,7 +88,7 @@ function App() {
     try {
       const clientUpdateInfo = await electronAPI.checkClientUpdate();
       setUpdateInfo(clientUpdateInfo);
-
+      console.log("Client update info:", clientUpdateInfo);
       if (clientUpdateInfo.available) {
         // Client needs update or doesn't exist
         setNeedsUpdate(true);
