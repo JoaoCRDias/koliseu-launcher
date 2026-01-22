@@ -1,6 +1,7 @@
 {
   "appId": "com.koliseuot.launcher",
   "productName": "KoliseuOT Launcher",
+  "artifactName": "${productName}-Setup-${version}.${ext}",
   "directories": {
     "output": "out",
     "buildResources": "build"
@@ -31,13 +32,13 @@
     "sign": null
   },
   "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
+    "oneClick": true,
+    "perMachine": false,
     "allowElevation": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "KoliseuOT Launcher",
-    "license": "LICENSE.txt"
+    "artifactName": "KoliseuOT-Launcher-Setup-${version}.${ext}"
   },
   "mac": {
     "target": "dmg",

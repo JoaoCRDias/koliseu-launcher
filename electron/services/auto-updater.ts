@@ -141,9 +141,13 @@ export async function downloadLauncherUpdate(): Promise<void> {
 
 /**
  * Install the update and restart the app
+ * @param isSilent - If true, installs silently without showing installer UI (default: true)
+ * @param isForceRunAfter - If true, forces app to run after install (default: true)
  */
-export function installLauncherUpdate(): void {
-  autoUpdater.quitAndInstall(false, true);
+export function installLauncherUpdate(isSilent: boolean = true, isForceRunAfter: boolean = true): void {
+  // isSilent=true: Runs the installer in silent mode (no UI)
+  // isForceRunAfter=true: Forces the app to restart after installation
+  autoUpdater.quitAndInstall(isSilent, isForceRunAfter);
 }
 
 /**
