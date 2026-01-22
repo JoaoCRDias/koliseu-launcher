@@ -110,14 +110,16 @@ export default function Launcher({
       }}></div>
 
       {/* Launcher Update Banner */}
-      {launcherUpdate && (launcherUpdate.status === 'available' || launcherUpdate.status === 'downloading' || launcherUpdate.status === 'downloaded') && (
+      {launcherUpdate && (launcherUpdate.status === 'available' || launcherUpdate.status === 'downloading' || launcherUpdate.status === 'downloaded' || launcherUpdate.status === 'error') && (
         <div className="absolute top-0 left-0 right-0 z-30 p-3" style={{
-          background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(30, 64, 175, 0.95) 100%)',
-          borderBottom: '2px solid #60a5fa'
+          background: launcherUpdate.status === 'error'
+            ? 'linear-gradient(135deg, rgba(185, 28, 28, 0.95) 0%, rgba(127, 29, 29, 0.95) 100%)'
+            : 'linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(30, 64, 175, 0.95) 100%)',
+          borderBottom: launcherUpdate.status === 'error' ? '2px solid #f87171' : '2px solid #60a5fa'
         }}>
           <div className="flex items-center justify-between max-w-2xl mx-auto">
             <div className="flex items-center gap-3">
-              <span className="text-xl">🚀</span>
+              <span className="text-xl">{launcherUpdate.status === 'error' ? '⚠️' : '🚀'}</span>
               <div>
                 {launcherUpdate.status === 'available' && (
                   <p className="text-white text-sm font-medium">
@@ -132,6 +134,11 @@ export default function Launcher({
                 {launcherUpdate.status === 'downloaded' && (
                   <p className="text-white text-sm font-medium">
                     Atualização pronta! Reinicie para aplicar.
+                  </p>
+                )}
+                {launcherUpdate.status === 'error' && (
+                  <p className="text-white text-sm font-medium">
+                    Erro na atualização: {launcherUpdate.error || 'Erro desconhecido'}
                   </p>
                 )}
               </div>
@@ -159,6 +166,14 @@ export default function Launcher({
                   className="px-4 py-1.5 bg-green-500 text-white font-medium text-sm rounded hover:bg-green-400 transition-colors"
                 >
                   Reiniciar
+                </button>
+              )}
+              {launcherUpdate.status === 'error' && (
+                <button
+                  onClick={onDownloadLauncherUpdate}
+                  className="px-4 py-1.5 bg-white text-red-600 font-medium text-sm rounded hover:bg-red-50 transition-colors"
+                >
+                  Tentar novamente
                 </button>
               )}
             </div>

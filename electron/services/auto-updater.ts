@@ -117,9 +117,24 @@ export async function checkForLauncherUpdate(): Promise<void> {
  */
 export async function downloadLauncherUpdate(): Promise<void> {
   try {
+    console.log('[AutoUpdater] Starting download...');
+    // Send immediate feedback that download is starting
+    sendStatusToRenderer({
+      status: 'downloading',
+      progress: {
+        percent: 0,
+        bytesPerSecond: 0,
+        transferred: 0,
+        total: 0,
+      },
+    });
     await autoUpdater.downloadUpdate();
   } catch (error) {
     console.error('[AutoUpdater] Failed to download update:', error);
+    sendStatusToRenderer({
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Falha ao baixar atualização',
+    });
     throw error;
   }
 }

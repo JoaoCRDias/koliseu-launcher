@@ -156,7 +156,7 @@ function setupIpcHandlers(): void {
 }
 
 // App lifecycle events
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   console.log('Application starting...');
 
   setupIpcHandlers();
@@ -165,10 +165,14 @@ app.whenReady().then(() => {
   // Initialize auto-updater after window is created (only in production)
   if (app.isPackaged && mainWindow) {
     initAutoUpdater(mainWindow);
+    // Small delay to ensure event listeners are registered before checking
+    await new Promise(resolve => setTimeout(resolve, 500));
     // Check for launcher updates on startup
     checkForLauncherUpdate().catch(err => {
       console.error('Failed to check for launcher updates on startup:', err);
     });
+  } else {
+    console.log('[AutoUpdater] Skipping auto-updater in development mode');
   }
 
   app.on('activate', () => {
