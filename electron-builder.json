@@ -13,7 +13,7 @@
   "publish": {
     "provider": "github",
     "owner": "JoaoCRDias",
-    "repo": "kot-files"
+    "repo": "koliseu-launcher"
   },
   "win": {
     "target": [
