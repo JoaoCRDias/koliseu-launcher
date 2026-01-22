@@ -311,7 +311,7 @@ export default function Launcher({
                     textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(100,150,200,0.3)',
                     fontFamily: '"Georgia", serif'
                   }}>
-                    BAIXAR CLIENTE
+                    DOWNLOAD CLIENT
                   </span>
                 </button>
               </div>
@@ -351,7 +351,7 @@ export default function Launcher({
                   textShadow: '0 1px 0 rgba(255,255,255,0.4)',
                   fontFamily: '"Georgia", serif'
                 }}>
-                  ABRIR CLIENTE
+                  RUN CLIENT
                 </span>
               )}
             </button>
