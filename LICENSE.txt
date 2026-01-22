@@ -1,0 +1,18 @@
+KoliseuOT Launcher - End User License Agreement
+
+Copyright (c) 2025 KoliseuOT
+
+Permission is hereby granted to any person obtaining a copy of this software
+to use it for connecting to KoliseuOT game servers.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+By installing this software, you agree to:
+1. Use the launcher only for legitimate gameplay
+2. Not attempt to reverse engineer or modify the launcher
+3. Follow the KoliseuOT Terms of Service and game rules
+4. Not use the software for any illegal or unauthorized purposes
+
+For support, visit: https://discord.gg/qwaqFUFYRj

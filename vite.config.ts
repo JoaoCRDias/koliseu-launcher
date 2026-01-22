@@ -6,10 +6,15 @@ export default defineConfig(async () => ({
 
   clearScreen: false,
   server: {
-    port: 1420,
+    port: 5173,
     strictPort: true,
     watch: {
-      ignored: ["**/src-tauri/**"],
+      ignored: ["**/src-tauri/**", "**/dist-electron/**", "**/out/**"],
     },
+  },
+  base: "./",
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
   },
 }));

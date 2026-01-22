@@ -25,5 +25,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Tauri
+# Tauri (legacy - can be removed)
 src-tauri/target
+
+# Electron
+dist-electron
+out

@@ -7,10 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#1a1a2e',
-        secondary: '#16213e',
-        accent: '#0f3460',
-        highlight: '#e94560',
+        primary: '#0a0604',      // Preto profundo (fundo medieval)
+        secondary: '#2b1f1a',    // Marrom escuro (madeira)
+        accent: '#8b6f47',       // Bronze/ouro escuro
+        highlight: '#d4af37',    // Ouro puro
+        'stone-dark': '#3d2817', // Pedra escura
+        'gold-light': '#f0e68c', // Ouro claro
+        'blood': '#8b2e2e',      // Vermelho sangue (medieval)
       },
     },
   },
