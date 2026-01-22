@@ -1,6 +1,6 @@
 {
   "name": "koliseu-launcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "KoliseuOT Game Launcher",
   "author": "KoliseuOT Team",
   "main": "dist-electron/main.js",

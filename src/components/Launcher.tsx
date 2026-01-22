@@ -338,7 +338,7 @@ export default function Launcher({
                   textShadow: '0 1px 0 rgba(255,255,255,0.4)',
                   fontFamily: '"Georgia", serif'
                 }}>
-                  ENTRAR NO REINO
+                  ABRIR CLIENTE
                 </span>
               )}
             </button>
