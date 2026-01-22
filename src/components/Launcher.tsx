@@ -296,9 +296,7 @@ export default function Launcher({
                     textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(100,150,200,0.3)',
                     fontFamily: '"Georgia", serif'
                   }}>
-                    <span className="mr-2">&#9662;</span>
                     BAIXAR CLIENTE
-                    <span className="ml-2">&#9662;</span>
                   </span>
                 </button>
               </div>
