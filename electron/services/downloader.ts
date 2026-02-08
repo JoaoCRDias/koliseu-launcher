@@ -9,7 +9,7 @@ import { getClientDir } from './updater';
 import { DownloadProgress, FileChecksums } from '../types';
 
 // Folders that should never be replaced when updating (user data, configs, etc.)
-const KEPT_FOLDERS = ['characterdata', 'conf', 'minimap', 'screenshots'];
+const KEPT_FOLDERS = ['characterdata', 'conf', 'screenshots'];
 
 /**
  * Calculate SHA256 checksum of a file
@@ -25,8 +25,11 @@ export async function calculateFileChecksum(filePath: string): Promise<string> {
   });
 }
 
+// Folders that should have checksums generated (critical game files)
+const CHECKSUM_FOLDERS = ['bin', 'assets'];
+
 /**
- * Recursively collect files for checksumming (skip version.txt and checksums.json)
+ * Recursively collect files for checksumming (only bin/ and assets/ folders)
  */
 async function collectFilesForChecksum(
   dir: string,
@@ -37,18 +40,24 @@ async function collectFilesForChecksum(
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    const relativePath = path.relative(basePath, fullPath);
-
-    // Skip version.txt and checksums.json
-    if (relativePath === 'version.txt' || relativePath === 'checksums.json') {
-      continue;
-    }
+    const relativePath = path.relative(basePath, fullPath).replace(/\\/g, '/');
 
     if (entry.isDirectory()) {
-      await collectFilesForChecksum(fullPath, basePath, files);
+      // Only recurse into checksum folders or their subdirectories
+      const isChecksumFolder = CHECKSUM_FOLDERS.includes(entry.name);
+      const isInsideChecksumFolder = CHECKSUM_FOLDERS.some(folder => relativePath.startsWith(folder + '/'));
+
+      if (isChecksumFolder || isInsideChecksumFolder) {
+        await collectFilesForChecksum(fullPath, basePath, files);
+      }
     } else {
-      const checksum = await calculateFileChecksum(fullPath);
-      files[relativePath.replace(/\\/g, '/')] = checksum;
+      // Only add files that are inside checksum folders
+      const isInsideChecksumFolder = CHECKSUM_FOLDERS.some(folder => relativePath.startsWith(folder + '/'));
+
+      if (isInsideChecksumFolder) {
+        const checksum = await calculateFileChecksum(fullPath);
+        files[relativePath] = checksum;
+      }
     }
   }
 }

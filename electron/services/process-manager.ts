@@ -4,6 +4,62 @@ import * as fs from 'fs-extra';
 import { getClientDir } from './updater';
 import kill from 'tree-kill';
 
+// Client executable name
+const CLIENT_PROCESS_NAME = 'client.exe';
+
+/**
+ * Check if a process is running by name (Windows-compatible)
+ */
+export async function isProcessRunning(processName: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const normalizedName = processName.toLowerCase().endsWith('.exe')
+      ? processName
+      : `${processName}.exe`;
+
+    if (process.platform === 'win32') {
+      exec(`tasklist /FI "IMAGENAME eq ${normalizedName}" /NH`, (error, stdout) => {
+        if (error) {
+          resolve(false);
+          return;
+        }
+        // If process is running, stdout will contain the process name
+        resolve(stdout.toLowerCase().includes(normalizedName.toLowerCase()));
+      });
+    } else {
+      exec(`pgrep -f ${processName}`, (error) => {
+        resolve(!error);
+      });
+    }
+  });
+}
+
+/**
+ * Check if the game client is running
+ */
+export async function isClientRunning(): Promise<boolean> {
+  return isProcessRunning(CLIENT_PROCESS_NAME);
+}
+
+/**
+ * Kill the game client process if running
+ * Returns true if killed, false if wasn't running
+ */
+export async function killClientProcess(): Promise<boolean> {
+  const isRunning = await isClientRunning();
+  if (!isRunning) {
+    return false;
+  }
+
+  try {
+    await killProcessByName(CLIENT_PROCESS_NAME);
+    // Wait a bit for the process to fully terminate
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Kill process by name (Windows-compatible)
  */

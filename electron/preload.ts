@@ -27,6 +27,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   killProcessByName: (processName: string): Promise<number> =>
     ipcRenderer.invoke('kill-process-by-name', processName),
 
+  isClientRunning: (): Promise<boolean> =>
+    ipcRenderer.invoke('is-client-running'),
+
+  killClientProcess: (): Promise<boolean> =>
+    ipcRenderer.invoke('kill-client-process'),
+
   // Shell functions (replaces @tauri-apps/api/shell)
   openExternal: (url: string): Promise<void> =>
     ipcRenderer.invoke('open-external', url),
@@ -66,6 +72,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('launcher-update-status', listener);
     };
   },
+
+  // Window events
+  onWindowFocus: (callback: () => void) => {
+    const listener = () => callback();
+    ipcRenderer.on('window-focus', listener);
+
+    return () => {
+      ipcRenderer.removeListener('window-focus', listener);
+    };
+  },
 });
 
 // Type definitions for window.electronAPI
@@ -78,6 +94,8 @@ declare global {
       downloadCorruptedFiles: (args: { download_url: string; corrupted_files: string[] }) => Promise<void>;
       launchClient: () => Promise<void>;
       killProcessByName: (processName: string) => Promise<number>;
+      isClientRunning: () => Promise<boolean>;
+      killClientProcess: () => Promise<boolean>;
       openExternal: (url: string) => Promise<void>;
       onDownloadProgress: (callback: (progress: DownloadProgress) => void) => () => void;
       // Launcher auto-update
@@ -86,6 +104,8 @@ declare global {
       downloadLauncherUpdate: () => Promise<void>;
       installLauncherUpdate: () => Promise<void>;
       onLauncherUpdateStatus: (callback: (status: LauncherUpdateStatus) => void) => () => void;
+      // Window events
+      onWindowFocus: (callback: () => void) => () => void;
     };
   }
 }

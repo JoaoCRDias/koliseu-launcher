@@ -46,6 +46,7 @@ function App() {
   });
   const [corruptedFiles, setCorruptedFiles] = useState<string[]>([]);
   const checkingRef = React.useRef(false);
+  const isBusyRef = React.useRef(false);
 
   // Launcher auto-update state
   const [launcherVersion, setLauncherVersion] = useState<string>("");
@@ -75,13 +76,26 @@ function App() {
       setLauncherUpdate(status);
     });
 
+    // Listen for window focus events to re-check client version
+    const unsubscribeFocus = electronAPI.onWindowFocus?.(() => {
+      // Re-check version when window gains focus
+      checkForUpdates();
+    });
+
     return () => {
       if (unsubscribe) unsubscribe();
       if (unsubscribeLauncher) unsubscribeLauncher();
+      if (unsubscribeFocus) unsubscribeFocus();
     };
   }, []);
 
   async function checkForUpdates() {
+    // Skip if already busy (using ref to avoid stale closure in event listeners)
+    if (isBusyRef.current) {
+      return;
+    }
+
+    isBusyRef.current = true;
     setIsCheckingUpdates(true);
     setErrorMessage("");
 
@@ -106,6 +120,7 @@ function App() {
       setNeedsUpdate(false);
     } finally {
       setIsCheckingUpdates(false);
+      isBusyRef.current = false;
     }
   }
 
@@ -115,6 +130,24 @@ function App() {
       return;
     }
 
+    // Check if client is running and kill it before updating
+    try {
+      const isRunning = await electronAPI.isClientRunning();
+      if (isRunning) {
+        setDownloadProgress({
+          stage: "preparing",
+          message: "Fechando o cliente para atualização...",
+          percent: 0
+        });
+        await electronAPI.killClientProcess();
+        // Wait a bit for process to fully close
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.warn("Could not check/kill client process:", error);
+    }
+
+    isBusyRef.current = true;
     setIsDownloading(true);
     setErrorMessage("");
 
@@ -135,6 +168,7 @@ function App() {
         setNeedsUpdate(false);
         setDownloadProgress({ stage: "", message: "", percent: 0 });
         setIsDownloading(false);
+        isBusyRef.current = false;
         return;
 
       } catch (error) {
@@ -157,6 +191,7 @@ function App() {
     }
 
     setIsDownloading(false);
+    isBusyRef.current = false;
   }, [updateInfo]);
 
   const handleCheckIntegrity = useCallback(async () => {
@@ -206,6 +241,7 @@ function App() {
   }, [isDownloading, isCheckingIntegrity, isRepairingClient]);
 
   async function handleClientRepair(downloadUrl: string, filesToRepair: string[]) {
+    isBusyRef.current = true;
     setIsRepairingClient(true);
 
     try {
@@ -224,6 +260,7 @@ function App() {
       setErrorMessage(`Falha ao reparar arquivos corrompidos: ${error}`);
     } finally {
       setIsRepairingClient(false);
+      isBusyRef.current = false;
     }
   }
 

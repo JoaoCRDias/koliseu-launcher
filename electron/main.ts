@@ -3,7 +3,7 @@ import * as path from 'path';
 import { checkClientUpdate } from './services/updater';
 import { downloadClientUpdate, downloadCorruptedFiles } from './services/downloader';
 import { checkIntegrity } from './services/integrity';
-import { launchClient, killProcessByName } from './services/process-manager';
+import { launchClient, killProcessByName, isClientRunning, killClientProcess } from './services/process-manager';
 import {
   initAutoUpdater,
   checkForLauncherUpdate,
@@ -43,6 +43,13 @@ function createWindow(): void {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  // Notify renderer when window gains focus (to trigger version check)
+  mainWindow.on('focus', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window-focus');
+    }
   });
 }
 
@@ -107,6 +114,26 @@ function setupIpcHandlers(): void {
     } catch (error) {
       console.error('Error killing process:', error);
       throw error;
+    }
+  });
+
+  // Check if client is running
+  ipcMain.handle('is-client-running', async () => {
+    try {
+      return await isClientRunning();
+    } catch (error) {
+      console.error('Error checking if client is running:', error);
+      return false;
+    }
+  });
+
+  // Kill client process
+  ipcMain.handle('kill-client-process', async () => {
+    try {
+      return await killClientProcess();
+    } catch (error) {
+      console.error('Error killing client process:', error);
+      return false;
     }
   });
 
