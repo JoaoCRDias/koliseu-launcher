@@ -130,21 +130,15 @@ function App() {
       return;
     }
 
-    // Check if client is running and kill it before updating
+    // Block update if client is running
     try {
       const isRunning = await electronAPI.isClientRunning();
       if (isRunning) {
-        setDownloadProgress({
-          stage: "preparing",
-          message: "Fechando o cliente para atualização...",
-          percent: 0
-        });
-        await electronAPI.killClientProcess();
-        // Wait a bit for process to fully close
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setErrorMessage("Feche todos os clientes do jogo antes de atualizar.");
+        return;
       }
     } catch (error) {
-      console.warn("Could not check/kill client process:", error);
+      console.warn("Could not check if client is running:", error);
     }
 
     isBusyRef.current = true;

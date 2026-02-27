@@ -9,7 +9,15 @@ import { getClientDir } from './updater';
 import { DownloadProgress, FileChecksums } from '../types';
 
 // Folders that should never be replaced when updating (user data, configs, etc.)
-const KEPT_FOLDERS = ['characterdata', 'conf', 'screenshots'];
+// All names in lowercase for case-insensitive comparison
+const KEPT_FOLDERS = ['characterdata', 'minimap', 'conf', 'screenshots'];
+
+/**
+ * Check if a folder name matches a kept folder (case-insensitive)
+ */
+function isKeptFolder(name: string): boolean {
+  return KEPT_FOLDERS.includes(name.toLowerCase());
+}
 
 /**
  * Calculate SHA256 checksum of a file
@@ -72,7 +80,8 @@ async function removeNonKeptEntries(clientDir: string): Promise<void> {
 
   const entries = await fs.readdir(clientDir);
   for (const entry of entries) {
-    if (KEPT_FOLDERS.includes(entry)) {
+    if (isKeptFolder(entry)) {
+      console.log(`[Update] Preserving user folder: ${entry}`);
       continue;
     }
 
@@ -87,7 +96,8 @@ async function copyExtractedFiles(sourceDir: string, targetDir: string): Promise
   const entries = await fs.readdir(sourceDir);
 
   for (const entry of entries) {
-    if (KEPT_FOLDERS.includes(entry)) {
+    if (isKeptFolder(entry)) {
+      console.log(`[Update] Skipping copy of kept folder: ${entry}`);
       continue;
     }
 
@@ -206,7 +216,7 @@ export async function downloadClientUpdate(
       // Extract zip file with selective replacement
       await extract(zipPath, {
         dir: tempExtractDir,
-        onEntry: (entry, zipfile) => {
+        onEntry: (_entry, zipfile) => {
           const totalEntries = zipfile.entryCount;
           const currentIndex = zipfile.entriesRead;
           const percent = Math.round((currentIndex / totalEntries) * 100);
