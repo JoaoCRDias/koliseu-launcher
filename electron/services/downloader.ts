@@ -85,7 +85,22 @@ async function removeNonKeptEntries(clientDir: string): Promise<void> {
       continue;
     }
 
-    await fs.remove(path.join(clientDir, entry));
+    const entryPath = path.join(clientDir, entry);
+    try {
+      await fs.remove(entryPath);
+      console.log(`[Update] Removed: ${entry}`);
+    } catch (error) {
+      console.error(`[Update] Failed to remove ${entry}:`, error);
+      // Retry once after a short delay (file might be locked momentarily)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        await fs.remove(entryPath);
+        console.log(`[Update] Removed on retry: ${entry}`);
+      } catch (retryError) {
+        console.error(`[Update] Failed to remove ${entry} on retry:`, retryError);
+        throw new Error(`Não foi possível remover "${entry}". Feche todos os programas que possam estar usando arquivos do jogo e tente novamente.`);
+      }
+    }
   }
 }
 
